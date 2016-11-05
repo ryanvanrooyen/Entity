@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{819446DE-1429-4948-AA92-8E58A9868ACB}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Entity</RootNamespace>
+    <AssemblyName>Entity</AssemblyName>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="BehaviorTree">
+      <HintPath>Dependencies\BehaviorTree.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEditor">
+      <HintPath>Dependencies\UnityEditor.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>Dependencies\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>Dependencies\UnityEngine.UI.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Input\AxisInput.cs" />
+    <Compile Include="Input\Button.cs" />
+    <Compile Include="Input\ButtonIcons.cs" />
+    <Compile Include="Input\ButtonIconSource.cs" />
+    <Compile Include="Input\Controller.cs" />
+    <Compile Include="Input\ControllerFactory.cs" />
+    <Compile Include="Input\ControllerInputNames.cs" />
+    <Compile Include="Input\InputLogger.cs" />
+    <Compile Include="Input\FaceButtons.cs" />
+    <Compile Include="Input\KeyboardMouseInput.cs" />
+    <Compile Include="Input\PlaystationInputs.cs" />
+    <Compile Include="Input\ThumbStick.cs" />
+    <Compile Include="Input\Trigger.cs" />
+    <Compile Include="Input\XboxOneInputs.cs" />
+    <Compile Include="UI\Canvas.cs" />
+    <Compile Include="UI\CanvasExtensions.cs" />
+    <Compile Include="UI\MenuCanvas.cs" />
+    <Compile Include="UI\ScreenCanvas.cs" />
+    <Compile Include="UI\Navigation\ButtonNavigation.cs" />
+    <Compile Include="UI\Navigation\ItemSource.cs" />
+    <Compile Include="UI\Navigation\Menu.cs" />
+    <Compile Include="UI\Navigation\NavItem.cs" />
+    <Compile Include="UI\Navigation\Navigation.cs" />
+    <Compile Include="UI\Navigation\ThumbStickNavigation.cs" />
+    <Compile Include="UI\Elements\AlphaChannel.cs" />
+    <Compile Include="UI\Elements\Focusable.cs" />
+    <Compile Include="UI\Elements\Image.cs" />
+    <Compile Include="UI\Elements\ImageSource.cs" />
+    <Compile Include="UI\Elements\Slider.cs" />
+    <Compile Include="UI\Elements\Text.cs" />
+    <Compile Include="UI\Elements\TextIcon.cs" />
+    <Compile Include="UI\Elements\Toggle.cs" />
+    <Compile Include="UI\Elements\UIButton.cs" />
+    <Compile Include="UI\Elements\Visible.cs" />
+    <Compile Include="Utilities\Behaviors.cs" />
+    <Compile Include="Utilities\Colors.cs" />
+    <Compile Include="Utilities\Container.cs" />
+    <Compile Include="Utilities\GameObjectSorter.cs" />
+    <Compile Include="Utilities\GameState.cs" />
+    <Compile Include="Utilities\Lazy.cs" />
+    <Compile Include="Utilities\Line.cs" />
+    <Compile Include="Utilities\Logger.cs" />
+    <Compile Include="Utilities\MathHelpers.cs" />
+    <Compile Include="Utilities\ObjectExtensions.cs" />
+    <Compile Include="Utilities\ObjectGroup.cs" />
+    <Compile Include="Utilities\Objects.cs" />
+    <Compile Include="Utilities\Platform.cs" />
+    <Compile Include="Utilities\Pool.cs" />
+    <Compile Include="Sound\Sound.cs" />
+    <Compile Include="Sound\Sound2D.cs" />
+    <Compile Include="Sound\Sound3D.cs" />
+    <Compile Include="Sound\LoggedSound.cs" />
+    <Compile Include="Utilities\Net2.0Helpers.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Input\" />
+    <Folder Include="UI\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+</Project>
