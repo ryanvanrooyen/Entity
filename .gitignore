@@ -9,6 +9,9 @@
 *.svd
 
 obj
-bin
 packages
+UnitTests/bin
 
+**/UnityEditor.dll
+**/UnityEngine.dll
+**/UnityEngine.UI.dll

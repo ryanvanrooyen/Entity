@@ -16,11 +16,11 @@ namespace Entity
 
 	public interface IBehavior
 	{
-		Delegates.Action OnUpdate { get; set; }
-		Delegates.Action OnLateUpdate { get; set; }
+		Action OnUpdate { get; set; }
+		Action OnLateUpdate { get; set; }
 		Action<Collider> OnTriggerEntered { get; set; }
 		Action<Collider> OnTriggerExited { get; set; }
 		Action<Collision> OnCollisionEntered { get; set; }
-		Delegates.Action DrawGizmos { get; set; }
+		Action DrawGizmos { get; set; }
 	}
 }

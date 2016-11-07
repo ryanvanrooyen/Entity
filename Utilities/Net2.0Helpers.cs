@@ -2,30 +2,12 @@
 using System;
 using System.Collections.Generic;
 
-// This snipped allows for extension methods in .net 2.0
-// you need this once (only), and it must be in this namespace
-namespace System.Runtime.CompilerServices
-{
-	[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Method)]
-	public sealed class ExtensionAttribute : Attribute { }
-}
-
 namespace Entity
 {
-	// Adds basic Func/Actions to .net 2.0
-	public class Delegates
-	{
-		public delegate T Func<T>();
-		public delegate T Func<T1, T>(T1 param1);
-		public delegate void Action();
-		public delegate void Action<T1>(T1 param1);
-		public delegate void Action<T1, T2>(T1 param1, T2 param2);
-	}
-
 	// Adds basic LINQ style operators on arrays to .net 2.0
 	public static class LinqOperators
 	{
-		public static bool Any<T>(this T[] items, Delegates.Func<T, bool> condition)
+		public static bool Any<T>(this T[] items, Func<T, bool> condition)
 		{
 			if (items == null || condition == null)
 				return false;
@@ -40,12 +22,12 @@ namespace Entity
 			return false;
 		}
 
-		public static bool Any<T>(this ICollection<T> items, Delegates.Func<T, bool> condition)
+		public static bool Any<T>(this ICollection<T> items, Func<T, bool> condition)
 		{
 			return items.ToArray().Any(condition);
 		}
 
-		public static bool All<T>(this T[] items, Delegates.Func<T, bool> condition)
+		public static bool All<T>(this T[] items, Func<T, bool> condition)
 		{
 			// This is how LINQ's .All handles the empty case.
 			if (items == null || condition == null || items.Length == 0)
@@ -61,12 +43,12 @@ namespace Entity
 			return true;
 		}
 
-		public static bool All<T>(this ICollection<T> items, Delegates.Func<T, bool> condition)
+		public static bool All<T>(this ICollection<T> items, Func<T, bool> condition)
 		{
 			return items.ToArray().All(condition);
 		}
 
-		public static T[] Where<T>(this T[] items, Delegates.Func<T, bool> condition)
+		public static T[] Where<T>(this T[] items, Func<T, bool> condition)
 		{
 			if (items == null || condition == null)
 				return new T[0];
@@ -77,12 +59,12 @@ namespace Entity
 			return Array.FindAll(items, item => condition(item));
 		}
 
-		public static T[] Where<T>(this ICollection<T> items, Delegates.Func<T, bool> condition)
+		public static T[] Where<T>(this ICollection<T> items, Func<T, bool> condition)
 		{
 			return items.ToArray().Where(condition);
 		}
 
-		public static T FirstOrDefault<T>(this T[] items, Delegates.Func<T, bool> condition = null)
+		public static T FirstOrDefault<T>(this T[] items, Func<T, bool> condition = null)
 		{
 			var filteredItems = items;
 
@@ -95,13 +77,13 @@ namespace Entity
 			return filteredItems[0];
 		}
 
-		public static T FirstOrDefault<T>(this ICollection<T> items, Delegates.Func<T, bool> condition = null)
+		public static T FirstOrDefault<T>(this ICollection<T> items, Func<T, bool> condition = null)
 		{
 			return items.ToArray().FirstOrDefault(condition);
 		}
 
 		public static T[] OrderBy<T, TKey>(this T[] items,
-			Delegates.Func<T, TKey> keySelector, IComparer<TKey> comparer = null)
+			Func<T, TKey> keySelector, IComparer<TKey> comparer = null)
 		{
 			if (items == null || keySelector == null)
 				return new T[0];
@@ -122,13 +104,13 @@ namespace Entity
 		}
 
 		public static T[] OrderBy<T, TKey>(this ICollection<T> items,
-			Delegates.Func<T, TKey> keySelector, IComparer<TKey> comparer = null)
+			Func<T, TKey> keySelector, IComparer<TKey> comparer = null)
 		{
 			return items.ToArray().OrderBy(keySelector, comparer);
 		}
 
 		public static T[] OrderByDescending<T, TKey>(this T[] items,
-			Delegates.Func<T, TKey> keySelector, IComparer<TKey> comparer = null)
+			Func<T, TKey> keySelector, IComparer<TKey> comparer = null)
 		{
 			if (items == null || keySelector == null)
 				return new T[0];
@@ -139,7 +121,7 @@ namespace Entity
 		}
 
 		public static T[] OrderByDescending<T, TKey>(this ICollection<T> items,
-			Delegates.Func<T, TKey> keySelector, IComparer<TKey> comparer = null)
+			Func<T, TKey> keySelector, IComparer<TKey> comparer = null)
 		{
 			return items.ToArray().OrderByDescending(keySelector, comparer);
 		}

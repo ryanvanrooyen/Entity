@@ -10,10 +10,10 @@ namespace Entity
 
 	public class Lazy<T> : ILazy<T> where T : class
 	{
-		private readonly Delegates.Func<T> factory;
+		private readonly Func<T> factory;
 		private T instance;
 
-		public Lazy(Delegates.Func<T> factory)
+		public Lazy(Func<T> factory)
 		{
 			if (factory == null)
 				throw new ArgumentNullException("factory");

@@ -11,16 +11,21 @@ namespace Entity
 
 	public class Pool<T> : IPool<T> where T : class
 	{
-		private readonly Delegates.Func<T> factory;
+		private readonly Func<T> factory;
 		private readonly IList<T> items;
 		private int currentIndex = 0;
 
-		public Pool(int number, Delegates.Func<T> factory)
+		public string TestProp { get; private set; }
+
+		public Pool(int number, Func<T> factory)
 		{
 			if (number <= 0)
 				throw new ArgumentException("number must be a positive value");
 			if (factory == null)
 				throw new ArgumentNullException("factory");
+
+			var str = "";//$"blah{factory.ToString()}";
+			this.TestProp = str;
 
 			this.factory = factory;
 			this.items = new List<T>(number);

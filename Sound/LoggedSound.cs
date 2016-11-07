@@ -7,10 +7,10 @@ namespace Entity
 	public class LoggedSound : ISound
 	{
 		private readonly ISound sound;
-		private readonly ILogger logger;
+		private readonly ILog logger;
 		private readonly string text;
 
-		public LoggedSound(ISound sound, ILogger logger, string text)
+		public LoggedSound(ISound sound, ILog logger, string text)
 		{
 			if (sound == null) throw new ArgumentNullException("sound");
 			if (logger == null) throw new ArgumentNullException("logger");
@@ -24,17 +24,17 @@ namespace Entity
 		public void PlayAt(Vector3 point)
 		{
 			this.sound.PlayAt(point);
-			this.logger.Log(this.text);
+			this.logger.Info(this.text);
 		}
 	}
 
 	public class LoggedSound2d : ISound2d
 	{
 		private readonly ISound2d sound;
-		private readonly ILogger logger;
+		private readonly ILog logger;
 		private readonly string text;
 
-		public LoggedSound2d(ISound2d sound, ILogger logger, string text)
+		public LoggedSound2d(ISound2d sound, ILog logger, string text)
 		{
 			if (sound == null) throw new ArgumentNullException("sound");
 			if (logger == null) throw new ArgumentNullException("logger");
@@ -48,7 +48,7 @@ namespace Entity
 		public void Play()
 		{
 			this.sound.Play();
-			this.logger.Log(this.text);
+			this.logger.Info(this.text);
 		}
 	}
 }

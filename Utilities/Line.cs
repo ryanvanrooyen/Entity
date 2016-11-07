@@ -7,7 +7,7 @@ namespace Entity
 	public class Line
 	{
 		public static void Draw(Vector3[] points,
-			Delegates.Action<Vector3, Vector3> drawLine,
+			Action<Vector3, Vector3> drawLine,
 			Action<Vector3> onPoint = null)
 		{
 			for (var i = 0; i < points.Length - 1; i++)

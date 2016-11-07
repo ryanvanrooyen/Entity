@@ -10,7 +10,7 @@ namespace Entity
 
 	public interface IWorldCanvas : IVisible, ILateUpdate
 	{
-		GameObject Add(string prefab, Delegates.Func<Vector3?> location,
+		GameObject Add(string prefab, Func<Vector3?> location,
 			float? offscreenIconDistance = null);
 	}
 
@@ -31,7 +31,7 @@ namespace Entity
 			this.removedObjects = new List<WorldUIObject>();
 		}
 
-		public GameObject Add(string prefab, Delegates.Func<Vector3?> location,
+		public GameObject Add(string prefab, Func<Vector3?> location,
 			float? offscreenIconDistance = null)
 		{
 			if (location == null)
@@ -157,7 +157,7 @@ namespace Entity
 
 		private class WorldUIObject
 		{
-			private readonly Delegates.Func<Vector3?> locationSrc;
+			private readonly Func<Vector3?> locationSrc;
 
 			public GameObject UI { get; private set; }
 			public Vector3? Location { get; private set; }
@@ -167,7 +167,7 @@ namespace Entity
 			public RectTransform Transform { get; private set; }
 			public Vector3 InitialScale { get; private set; }
 
-			public WorldUIObject(GameObject ui, Delegates.Func<Vector3?> locationSrc,
+			public WorldUIObject(GameObject ui, Func<Vector3?> locationSrc,
 				float? offscreenIconDistance, GameObject arrowIcon)
 			{
 				this.UI = ui;

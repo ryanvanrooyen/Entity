@@ -139,10 +139,10 @@ namespace Entity
 	{
 		private readonly ISlider slider;
 		private readonly IText text;
-		private readonly Delegates.Func<ISlider, string> formatter;
+		private readonly Func<ISlider, string> formatter;
 
 		public SliderWithText(ISlider slider, IText text,
-			Delegates.Func<ISlider, string> formatter)
+			Func<ISlider, string> formatter)
 		{
 			if (slider == null)
 				throw new ArgumentNullException("slider");

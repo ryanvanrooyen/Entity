@@ -365,7 +365,7 @@ namespace Entity
 			get { return string.Format("Proxy{0}", this.id); }
 		}
 
-		public Delegates.Func<bool> IsPressedProxy { get; set; }
+		public Func<bool> IsPressedProxy { get; set; }
 		public bool IsPressed
 		{
 			get
@@ -376,7 +376,7 @@ namespace Entity
 			}
 		}
 
-		public Delegates.Func<bool> WasPressedProxy { get; set; }
+		public Func<bool> WasPressedProxy { get; set; }
 		public bool WasPressed
 		{
 			get

@@ -7,7 +7,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Entity</RootNamespace>
     <AssemblyName>Entity</AssemblyName>
-    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -84,7 +84,7 @@
     <Compile Include="Utilities\GameState.cs" />
     <Compile Include="Utilities\Lazy.cs" />
     <Compile Include="Utilities\Line.cs" />
-    <Compile Include="Utilities\Logger.cs" />
+    <Compile Include="Utilities\Log.cs" />
     <Compile Include="Utilities\MathHelpers.cs" />
     <Compile Include="Utilities\ObjectExtensions.cs" />
     <Compile Include="Utilities\ObjectGroup.cs" />

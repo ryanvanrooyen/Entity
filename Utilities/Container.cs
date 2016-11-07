@@ -1,5 +1,6 @@
 ﻿
 using UnityEngine;
+using System;
 
 namespace Entity
 {
@@ -14,10 +15,10 @@ namespace Entity
 		void Bind<T1, T2>() where T2 : T1;
 
 		void BindFactory<T>(IFactory<T> factory);
-		void BindFactory<T>(Delegates.Func<IContainer, T> factory);
+		void BindFactory<T>(Func<IContainer, T> factory);
 		void BindFactory<T1, T2>() where T2 : IFactory<T1>;
 
-		void BindProp<T1, T2>(Delegates.Func<T1, T2> source);
+		void BindProp<T1, T2>(Func<T1, T2> source);
 		void BindTransient<T1, T2>() where T2 : T1;
 	}
 

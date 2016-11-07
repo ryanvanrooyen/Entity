@@ -13,14 +13,14 @@ namespace Entity
 
 	public class NavItem : INavItem
 	{
-		private readonly Delegates.Action onSelect;
+		private readonly Action onSelect;
 		private readonly Action<bool> onFocus;
-		private readonly Delegates.Action onCancel;
+		private readonly Action onCancel;
 		private readonly INavigatable childNav;
 		private bool hasFocus = false;
 
-		public NavItem(Delegates.Action onSelect = null,
-			Action<bool> onFocus = null, Delegates.Action onCancel = null,
+		public NavItem(Action onSelect = null,
+			Action<bool> onFocus = null, Action onCancel = null,
 			INavigatable childNav = null)
 		{
 			this.onSelect = onSelect;

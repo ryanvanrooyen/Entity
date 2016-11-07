@@ -360,12 +360,12 @@ namespace Entity
 
 		private class UnityBehavior : MonoBehaviour, IBehavior
 		{
-			public Delegates.Action OnUpdate { get; set; }
-			public Delegates.Action OnLateUpdate { get; set; }
+			public Action OnUpdate { get; set; }
+			public Action OnLateUpdate { get; set; }
 			public Action<Collider> OnTriggerEntered { get; set; }
 			public Action<Collider> OnTriggerExited { get; set; }
 			public Action<Collision> OnCollisionEntered { get; set; }
-			public Delegates.Action DrawGizmos { get; set; }
+			public Action DrawGizmos { get; set; }
 
 			// Update is called once per frame
 			public void Update()

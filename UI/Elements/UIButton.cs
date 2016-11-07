@@ -11,10 +11,10 @@ namespace Entity
 	public class UIButton : ButtonDecorator, IUIButton
 	{
 		private readonly IImage icon;
-		private readonly Delegates.Action onPressed;
+		private readonly Action onPressed;
 
 		public UIButton(IButton button, GameObject obj,
-			Delegates.Action onPressed = null) : base(button)
+			Action onPressed = null) : base(button)
 		{
 			if (obj == null)
 				throw new ArgumentNullException("obj");
