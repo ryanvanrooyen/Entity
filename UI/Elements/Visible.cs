@@ -114,9 +114,9 @@ namespace Entity
 		private void Fade()
 		{
 			if (this.isVisible)
-				this.gameObject.Run(FadeOut());
+				this.gameObject.Run("FadeOut", FadeOut());
 			else
-				this.gameObject.Run(FadeIn());
+				this.gameObject.Run("FadeIn", FadeIn());
 		}
 
 		private IEnumerator FadeIn()

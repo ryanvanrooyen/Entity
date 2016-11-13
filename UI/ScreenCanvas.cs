@@ -102,7 +102,7 @@ namespace Entity
 					if (obj.UI.activeSelf)
 						obj.UI.SetActive(false);
 
-					obj.Transform.localScale = obj.InitialScale;
+					//obj.Transform.localScale = obj.InitialScale;
 				}
 
 				obj.Transform.SetAsLastSibling();

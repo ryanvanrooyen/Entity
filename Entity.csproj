@@ -18,6 +18,15 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
+    <CustomCommands>
+      <CustomCommands>
+        <Command>
+          <type>AfterBuild</type>
+          <command>cp bin/Debug/Entity.dll bin/Debug/Entity.dll.mdb bin/Debug/BehaviorTree.dll Dependencies/BehaviorTree.dll.mdb ../GamePrototype/Assets/Dependencies</command>
+          <workingdir>${SolutionDir}</workingdir>
+        </Command>
+      </CustomCommands>
+    </CustomCommands>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
@@ -25,6 +34,14 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
+    <CustomCommands>
+      <CustomCommands>
+        <Command>
+          <type>AfterBuild</type>
+          <command>cp bin/Release/Entity.dll bin/Release/BehaviorTree.dll ../GamePrototype/Assets/Dependencies</command>
+        </Command>
+      </CustomCommands>
+    </CustomCommands>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -95,7 +112,7 @@
     <Compile Include="Sound\Sound2D.cs" />
     <Compile Include="Sound\Sound3D.cs" />
     <Compile Include="Sound\LoggedSound.cs" />
-    <Compile Include="Utilities\Net2.0Helpers.cs" />
+    <Compile Include="Utilities\NetHelpers.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Input\" />

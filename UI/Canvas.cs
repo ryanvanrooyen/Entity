@@ -64,6 +64,7 @@ namespace Entity
 		{
 			drawOffscreenIcon = false;
 			var screenPoint = this.camera.WorldToScreenPoint(point);
+
 			var screenX = screenPoint.x;
 			var screenY = screenPoint.y;
 			var screenZ = screenPoint.z;

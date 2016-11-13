@@ -68,31 +68,72 @@ namespace Entity
 			return metadata.Get<T>();
 		}
 
-		public static IBehavior AddBehavior(this GameObject gameObj)
+		public static IUnityBehavior AddBehavior(this GameObject gameObj)
 		{
 			return gameObj.AddComponent<UnityBehavior>();
 		}
 
-		public static void Run(this GameObject gameObj, IEnumerator coroutine)
+		public static void Run(this GameObject gameObj, string coroutineId, IEnumerator coroutine)
 		{
-			RunOn(gameObj, coroutine);
+			RunOn(gameObj, gameObj, coroutineId, coroutine);
 		}
 
-		private static void RunAlways(this GameObject gameObj, IEnumerator coroutine)
+		private static void RunAlways(this GameObject gameObj, string coroutineId, IEnumerator coroutine)
 		{
-			RunOn(coroutineSource, coroutine);
+			RunOn(coroutineSource, gameObj, coroutineId, coroutine);
 		}
 
-		private static void RunOn(GameObject source, IEnumerator coroutine)
+		private static void RunOn(GameObject source, GameObject gameObj,
+			string coroutineId, IEnumerator coroutine)
 		{
-			if (source == null)
+			if (source == null || gameObj == null || coroutine == null || coroutineId == null)
 				return;
 
-			var coroutines = source.GetComponent<Metadata>();
-			if (coroutines == null)
-				coroutines = source.AddComponent<Metadata>();
+			var metadata = gameObj.GetOrAddComponent<Metadata>();
+			var srcMetadata = source.GetOrAddComponent<Metadata>();
+			var info = metadata.GetOrAdd(() => new List<CoroutineInfo>());
 
-			coroutines.StartCoroutine(coroutine);
+			CoroutineInfo existing = null;
+			for (var i = 0; i < info.Count; i++)
+			{
+				var current = info[i];
+				if (current.Id == coroutineId)
+				{
+					existing = current;
+					break;
+				}
+			}
+
+			if (existing != null)
+			{
+				info.Remove(existing);
+				srcMetadata.StopCoroutine(existing.Enumerator);
+			}
+
+			info.Add(new CoroutineInfo(coroutine, coroutineId));
+
+			srcMetadata.StartCoroutine(coroutine);
+		}
+
+		public static T GetOrAddComponent<T>(this GameObject gameObj) where T : MonoBehaviour
+		{
+			var component = gameObj.GetComponent<T>();
+			if (component == null)
+				component = gameObj.AddComponent<T>();
+
+			return component;
+		}
+
+		private class CoroutineInfo
+		{
+			public IEnumerator Enumerator { get; private set; }
+			public string Id { get; private set; }
+
+			public CoroutineInfo(IEnumerator enumerator, string id)
+			{
+				this.Enumerator = enumerator;
+				this.Id = id;
+			}
 		}
 
 		public static GameObject Get(this GameObject gameObj, string name)
@@ -164,18 +205,19 @@ namespace Entity
 		}
 
 		public static void Move(this GameObject gameObj,
-			Vector3 position, float animationSpeed = 0f)
+			Vector3 position, float durationSecs = 0f, bool animateIndependentOfTime = false)
 		{
 			if (Equal(gameObj.transform.position, position))
 				return;
 
-			if (animationSpeed <= 0f)
+			if (durationSecs <= 0f)
 			{
 				gameObj.transform.position = position;
 				return;
 			}
 
-			gameObj.RunAlways(LerpPos(gameObj, position, animationSpeed));
+			gameObj.RunAlways("_LerpPos", LerpPos(gameObj,
+				position, durationSecs, animateIndependentOfTime));
 		}
 
 		public static bool HasParent(this GameObject gameObj, GameObject parent)
@@ -231,63 +273,84 @@ namespace Entity
 		}
 
 		public static void MoveLocal(this GameObject gameObj,
-			Vector3 position, float animationSpeed = 0f)
+			Vector3 position, float durationSecs = 0f, bool animateIndependentOfTime = false)
 		{
 			if (Equal(gameObj.transform.localPosition, position))
 				return;
 
-			if (animationSpeed <= 0f)
+			if (durationSecs <= 0f)
 			{
 				gameObj.transform.localPosition = position;
 				return;
 			}
 
-			gameObj.RunAlways(LerpPosLocal(gameObj, position, animationSpeed));
+			gameObj.RunAlways("_LerpPosLocal", LerpPosLocal(gameObj,
+				position, durationSecs, animateIndependentOfTime));
 		}
 
-		private static IEnumerator LerpPos(GameObject gameObj, Vector3 position, float speed)
+		private static IEnumerator LerpPos(GameObject gameObj,
+			Vector3 position, float durationSecs, bool animateIndependentOfTime)
 		{
 			var transform = gameObj.transform;
-			var waitSecs = 0.01f * speed;
-			var progress = 0f;
+			var elapsedTime = animateIndependentOfTime ? Time.unscaledDeltaTime : Time.deltaTime;
 			var start = transform.position;
 
-			while (!Equal(transform.position, position))
+			while (true)
 			{
-				progress += waitSecs;
-				transform.position = Vector3.Lerp(start, position, progress);
+				var percent = elapsedTime / durationSecs;
+				if (percent >= 1.0f)
+				{
+					transform.position = position;
+					break;
+				}
+
+				transform.position = Vector3.Lerp(start, position, percent);
+				var deltaTime = animateIndependentOfTime ? Time.unscaledDeltaTime : Time.deltaTime;
+				elapsedTime += deltaTime;
+
 				yield return null;
 			}
 		}
 
-		private static IEnumerator LerpPosLocal(GameObject gameObj, Vector3 position, float speed)
+		private static IEnumerator LerpPosLocal(GameObject gameObj,
+			Vector3 position, float durationSecs, bool animateIndependentOfTime)
 		{
 			var transform = gameObj.transform;
-			var waitSecs = 0.01f * speed;
-			var progress = 0f;
+			var elapsedTime = animateIndependentOfTime ? Time.unscaledDeltaTime : Time.deltaTime;
 			var start = transform.localPosition;
 
-			while (!Equal(transform.localPosition, position))
+			while (true)
 			{
-				progress += waitSecs;
-				transform.localPosition = Vector3.Lerp(start, position, progress);
+				var percent = elapsedTime / durationSecs;
+				if (percent >= 1.0f)
+				{
+					transform.localPosition = position;
+					break;
+				}
+
+				transform.localPosition = Vector3.Lerp(start, position, percent);
+				var deltaTime = animateIndependentOfTime ? Time.unscaledDeltaTime : Time.deltaTime;
+				elapsedTime += deltaTime;
+
 				yield return null;
 			}
 		}
 
-		public static void Scale(this GameObject gameObj, float scale, float animationSpeed = 0f)
+		public static void Scale(this GameObject gameObj, float scale,
+			float durationSecs = 0f, bool animateIndependentOfTime = false)
 		{
 			var destScale = new Vector3(scale, scale, scale);
 			if (Equal(gameObj.transform.localScale, destScale))
 				return;
 
-			if (animationSpeed <= 0f)
+			if (durationSecs <= 0f)
 			{
 				gameObj.transform.localScale = destScale;
 				return;
 			}
 
-			gameObj.RunAlways(LerpScale(gameObj, destScale, animationSpeed));
+			gameObj.RunAlways("_LerpScale", LerpScale(
+				gameObj, destScale, durationSecs, animateIndependentOfTime));
 		}
 
 		public static void SetLayerRecursively(this GameObject obj, int newLayer)
@@ -304,21 +367,28 @@ namespace Entity
 			}
 		}
 
-		private static IEnumerator LerpScale(GameObject gameObj, Vector3 destScale, float speed)
+		private static IEnumerator LerpScale(GameObject gameObj,
+			Vector3 destScale, float durationSecs, bool animateIndependentOfTime)
 		{
 			var transform = gameObj.transform;
-			var waitSecs = 0.01f * speed;
-			var progress = 0f;
+			var elapsedTime = animateIndependentOfTime ? Time.unscaledDeltaTime : Time.deltaTime;
 			var start = transform.localScale;
 
-			while (!Equal(transform.localScale, destScale))
+			while (true)
 			{
-				progress += waitSecs;
-				transform.localScale = Vector3.Lerp(start, destScale, progress);
+				var percent = elapsedTime / durationSecs;
+				if (percent >= 1.0f)
+				{
+					transform.localScale = destScale;
+					break;
+				}
+
+				transform.localScale = Vector3.Lerp(start, destScale, percent);
+				var deltaTime = animateIndependentOfTime ? Time.unscaledDeltaTime : Time.deltaTime;
+				elapsedTime += deltaTime;
+
 				yield return null;
 			}
-
-			//Debug.Log(string.Format("Finished lerping to scale: {0} {1}", gameObj.name, transform.localScale));
 		}
 
 		private static bool Equal(Vector3 v1, Vector3 v2)
@@ -348,6 +418,17 @@ namespace Entity
 				return null;
 			}
 
+			public T GetOrAdd<T>(Func<T> factory) where T : class
+			{
+				var item = Get<T>();
+				if (item != null)
+					return item;
+
+				var newItem = factory();
+				Add(newItem);
+				return newItem;
+			}
+
 			public T Remove<T>() where T : class
 			{
 				var item = Get<T>();
@@ -358,7 +439,7 @@ namespace Entity
 			}
 		}
 
-		private class UnityBehavior : MonoBehaviour, IBehavior
+		private class UnityBehavior : MonoBehaviour, IUnityBehavior
 		{
 			public Action OnUpdate { get; set; }
 			public Action OnLateUpdate { get; set; }

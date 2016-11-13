@@ -81,7 +81,7 @@ namespace Entity
 			{
 				this.value = value;
 				if (this.IsVisible && this.UseAnimation)
-					this.coroutineSrc.Run(UpdateSliderValue());
+					this.coroutineSrc.Run("UpdateSliderValue", UpdateSliderValue());
 				else
 					this.slider.Value = this.value;
 			}
@@ -190,7 +190,11 @@ namespace Entity
 		public bool IsVisible
 		{
 			get { return this.slider.IsVisible; }
-			set { this.slider.IsVisible = value; }
+			set
+			{
+				this.slider.IsVisible = value;
+				this.text.IsVisible = value;
+			}
 		}
 	}
 }

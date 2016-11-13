@@ -95,6 +95,7 @@ namespace Entity
 
 					if (!this.childNavsCaptureInput)
 						this.CheckInput();
+
 					return;
 				}
 

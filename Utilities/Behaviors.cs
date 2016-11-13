@@ -14,7 +14,7 @@ namespace Entity
 		void LateUpdate();
 	}
 
-	public interface IBehavior
+	public interface IUnityBehavior
 	{
 		Action OnUpdate { get; set; }
 		Action OnLateUpdate { get; set; }

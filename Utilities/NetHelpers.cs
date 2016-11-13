@@ -4,6 +4,21 @@ using System.Collections.Generic;
 
 namespace Entity
 {
+	public static class StringExtensions
+	{
+		public static string Join(this string[] strings, string joiningStr)
+		{
+			if (strings == null || strings.Length == 0)
+				return string.Empty;
+
+			var str = strings[0];
+			for (var i = 1; i < strings.Length; i++)
+				str += joiningStr + strings[i];
+
+			return str;
+		}
+	}
+
 	// Adds basic LINQ style operators on arrays to .net 2.0
 	public static class LinqOperators
 	{
