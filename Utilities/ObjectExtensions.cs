@@ -204,6 +204,24 @@ namespace Entity
 			return horizontalAngle;
 		}
 
+
+		public static float VerticalAngleTo(this Transform transform, Vector3 point)
+		{
+			var inverseRot = Quaternion.Inverse(transform.rotation);
+			var targetDir = inverseRot * (point - transform.position);
+			var forward = inverseRot * transform.forward;
+
+			var targetDirNormalize = targetDir.normalized;
+			var to = new Vector3(0, -targetDirNormalize.y, targetDirNormalize.z);
+			var rot = Quaternion.FromToRotation(forward, to);
+
+			var verticalAngle = rot.eulerAngles.x;
+			if (verticalAngle > 180f)
+				verticalAngle = verticalAngle - 360;
+
+			return verticalAngle;
+		}
+
 		public static void Move(this GameObject gameObj,
 			Vector3 position, float durationSecs = 0f, bool animateIndependentOfTime = false)
 		{
@@ -389,6 +407,44 @@ namespace Entity
 
 				yield return null;
 			}
+		}
+
+		public static Vector3 GetAimPoint(this Transform transform, Vector3 targetPos,
+			Vector3 targetVelocity, float projectileVelocity)
+		{
+			if (transform == null)
+				return Vector3.zero;
+
+			//distance in between in meters
+			var pos = transform.position;
+			var distance = Vector3.Distance(pos, targetPos);
+
+			// Adjust velocity based on super close or super far distances.
+			if (distance < 30)
+				projectileVelocity = projectileVelocity - (30 - distance);
+			
+			var flightTime = distance / projectileVelocity;
+
+			//time in seconds the shot would need to arrive at the target
+			var travelTime = distance / projectileVelocity;
+
+			var aimPoint = targetPos + targetVelocity * travelTime;
+
+			// Second Pass, calculate distance based on first pass' result
+			// Using point between aimPoint and target
+			var distance2 = Vector3.Distance(pos, targetPos + ((targetPos - aimPoint) / 2F));
+			var flightTime2 = distance2 / projectileVelocity;
+			aimPoint = targetPos + targetVelocity * flightTime2;
+
+
+			// Calculate vertical drop.
+			var initVerticalVelocity = Vector3.zero;
+			var heightDrop = (initVerticalVelocity * flightTime) +
+				(0.5f * Physics.gravity * (flightTime * flightTime));
+
+			aimPoint = aimPoint - heightDrop;
+
+			return aimPoint;
 		}
 
 		private static bool Equal(Vector3 v1, Vector3 v2)
