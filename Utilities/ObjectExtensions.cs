@@ -440,7 +440,7 @@ namespace Entity
 			// Calculate vertical drop.
 			var initVerticalVelocity = Vector3.zero;
 			var heightDrop = (initVerticalVelocity * flightTime) +
-				(0.5f * Physics.gravity * (flightTime * flightTime));
+				(0.6f * Physics.gravity * (flightTime * flightTime));
 
 			aimPoint = aimPoint - heightDrop;
 
