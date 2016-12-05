@@ -83,7 +83,7 @@
     <Compile Include="UI\Navigation\Menu.cs" />
     <Compile Include="UI\Navigation\NavItem.cs" />
     <Compile Include="UI\Navigation\Navigation.cs" />
-    <Compile Include="UI\Navigation\ThumbStickNavigation.cs" />
+    <Compile Include="UI\Navigation\AxisNavigation.cs" />
     <Compile Include="UI\Elements\AlphaChannel.cs" />
     <Compile Include="UI\Elements\Focusable.cs" />
     <Compile Include="UI\Elements\Image.cs" />

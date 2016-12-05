@@ -87,8 +87,7 @@ namespace Entity
 
 		private IButton CreateAxisButton(IInputName axisName, IButtonIcon icon, float threshold)
 		{
-			return new Button(new ButtonAxisInput(
-				new AxisInput(axisName), threshold), icon);
+			return new Button(new AxisButtonInput(new AxisInput(axisName), threshold), icon);
 		}
 
 		private IThumbStick CreateThumbStick(IInputName xAxisName, IInputName yAxisName,

@@ -20,6 +20,7 @@ namespace Entity
 		bool Enabled { get; set; }
 		IButton New();
 		IButton Debounce(TimeSpan debounceTime);
+		IAxisInput ToAxisInput(float pressedAxisValue = 1f);
 	}
 
 	public interface IInputName
@@ -135,6 +136,11 @@ namespace Entity
 			return new DebouncedButton(this, debounceTime);
 		}
 
+		public IAxisInput ToAxisInput(float pressedAxisValue = 1f)
+		{
+			return new ButtonAxisInput(this.input, pressedAxisValue);
+		}
+
 		public bool Equals(IButton button)
 		{
 			if (button == null)
@@ -211,6 +217,11 @@ namespace Entity
 			return new DebouncedButton(this, debounceTime);
 		}
 
+		public IAxisInput ToAxisInput(float pressedAxisValue = 1f)
+		{
+			throw new InvalidOperationException("Cannot convert ButtonCombos to an individual axis.");
+		}
+
 		public bool Equals(IButton button)
 		{
 			if (button == null)
@@ -271,6 +282,11 @@ namespace Entity
 			return this.button.Debounce(debounceTime);
 		}
 
+		public IAxisInput ToAxisInput(float pressedAxisValue = 1f)
+		{
+			return this.button.ToAxisInput(pressedAxisValue);
+		}
+
 		public virtual bool Equals(IButton button)
 		{
 			return this.button.Equals(button);
@@ -320,7 +336,7 @@ namespace Entity
 		}
 	}
 
-	public class NullButton : IButton
+	public class NullButton : IButton, IButtonInput
 	{
 		public string Name { get { return "null"; } }
 		public bool IsPressed { get { return false; } }
@@ -338,6 +354,11 @@ namespace Entity
 			return this;
 		}
 
+		public IAxisInput ToAxisInput(float pressedAxisValue = 1f)
+		{
+			return new ButtonAxisInput(this, pressedAxisValue);
+		}
+
 		public override string ToString()
 		{
 			return "(No Button)";
@@ -349,7 +370,7 @@ namespace Entity
 		}
 	}
 
-	public class ProxyButton : IButton
+	public class ProxyButton : IButton, IButtonInput
 	{
 		private static int count = 0;
 		private readonly int id;
@@ -406,6 +427,11 @@ namespace Entity
 		public IButton Debounce(TimeSpan debounceTime)
 		{
 			return this;
+		}
+
+		public IAxisInput ToAxisInput(float pressedAxisValue = 1f)
+		{
+			return new ButtonAxisInput(this, pressedAxisValue);
 		}
 
 		public override string ToString()

@@ -3,12 +3,14 @@ using System;
 
 namespace Entity
 {
-	public class ThumbStickNavigation : Navigation<IAxis>
+	public class AxisNavigation : Navigation<IAxis>
 	{
-		private const float threshold = 0.7f;
+		public const float DebounceThreshold = 0.7f;
+		public static readonly TimeSpan DebounceTime = TimeSpan.FromSeconds(0.4f);
+
 		private readonly IAxis axis;
 
-		public ThumbStickNavigation(IButton selectButton,
+		public AxisNavigation(IButton selectButton,
 			IButton cancelButton, IAxis axis, ISound2d onMoveSound,
 			INavEvents events, INavItemSource itemSource,
 			bool childNavsCaptureInput = true, bool autoResolveFocus = false)
@@ -18,7 +20,8 @@ namespace Entity
 			if (axis == null)
 				throw new ArgumentNullException("axis");
 
-			this.axis = axis.Debounce(threshold);
+			this.axis = axis.Debounce(DebounceThreshold, DebounceTime);
+			
 			this.PreviousInput = this.axis;
 			this.NextInput = this.axis;
 		}
@@ -26,11 +29,35 @@ namespace Entity
 		protected override void CheckInput()
 		{
 			var value = this.axis.Value;
-			if (value < (-threshold))
+			if (value < (-DebounceThreshold))
 				MoveNext();
-			else if (value > threshold)
+			else if (value > DebounceThreshold)
 				MovePrevious();
 		}
+	}
+
+	public class HorizontalNavigation : AxisNavigation
+	{
+		public HorizontalNavigation(IButton selectButton, IButton cancelButton,
+			IDualAxis axis, IFaceButtons dpad, ISound2d onMoveSound,
+			INavEvents events, INavItemSource itemSource,
+			bool childNavsCaptureInput = true, bool autoResolveFocus = false)
+			: base(selectButton, cancelButton,
+				axis.Horizontal.Invert().AddButtonInput(dpad.Left, dpad.Right),
+				onMoveSound, events, itemSource, childNavsCaptureInput, autoResolveFocus)
+		{ }
+	}
+
+	public class VerticalNavigation : AxisNavigation
+	{
+		public VerticalNavigation(IButton selectButton, IButton cancelButton,
+			IDualAxis axis, IFaceButtons dpad, ISound2d onMoveSound,
+			INavEvents events, INavItemSource itemSource,
+			bool childNavsCaptureInput = true, bool autoResolveFocus = false)
+			: base(selectButton, cancelButton,
+				axis.Vertical.AddButtonInput(dpad.Bottom, dpad.Top),
+				onMoveSound, events, itemSource, childNavsCaptureInput, autoResolveFocus)
+		{ }
 	}
 
 	public class GridNavigation : Navigation<IAxis>
@@ -41,19 +68,25 @@ namespace Entity
 		private readonly int itemsPerRow;
 
 		public GridNavigation(IButton selectButton, IButton cancelButton,
-			IAxis rowAxis, IAxis columnAxis, int itemsPerRow, ISound2d onMoveSound,
+			IDualAxis axis, IFaceButtons dpad, int itemsPerRow, ISound2d onMoveSound,
 			INavEvents events, INavItemSource itemSource,
 			bool childNavsCaptureInput = true, bool autoResolveFocus = false)
 			: base(selectButton, cancelButton, itemSource, onMoveSound, events,
 				childNavsCaptureInput, autoResolveFocus)
 		{
-			if (rowAxis == null)
-				throw new ArgumentNullException("rowAxis");
-			if (columnAxis == null)
-				throw new ArgumentNullException("columnAxis");
+			if (axis == null)
+				throw new ArgumentNullException("axis");
+			if (dpad == null)
+				throw new ArgumentNullException("dpad");
+			
+			this.rowAxis = axis.Horizontal.Invert()
+				.AddButtonInput(dpad.Left, dpad.Right)
+				.Debounce(AxisNavigation.DebounceThreshold, AxisNavigation.DebounceTime);
+			
+			this.columnAxis = axis.Vertical
+				.AddButtonInput(dpad.Bottom, dpad.Top)
+				.Debounce(AxisNavigation.DebounceThreshold, AxisNavigation.DebounceTime);
 
-			this.rowAxis = rowAxis.Debounce(threshold);
-			this.columnAxis = columnAxis.Debounce(threshold);
 			this.itemsPerRow = itemsPerRow;
 			this.PreviousInput = this.rowAxis;
 			this.NextInput = this.rowAxis;
@@ -87,10 +120,9 @@ namespace Entity
 		}
 	}
 
-
-	public class ThumbStickIconNavigation : IconNavigation<IAxis>
+	public class AxisIconNavigation : IconNavigation<IAxis>
 	{
-		public ThumbStickIconNavigation(INavigation<IAxis> navigation,
+		public AxisIconNavigation(INavigation<IAxis> navigation,
 			IImage selectIcon, IImage cancelIcon, IImage nextIcon, IImage previousIcon)
 			: base(navigation, selectIcon, cancelIcon, nextIcon, previousIcon)
 		{

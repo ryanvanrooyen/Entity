@@ -16,14 +16,12 @@ namespace Entity
 
 	public interface IAxis : IAxisValue, IImgSource
 	{
-		IAxis Invert();
 		IImgSource NextIcon { get; }
 		IImgSource PreviousIcon { get; }
-		IAxis Debounce(float maxThreshold);
-	}
 
-	public interface IButtonAxisInput : IAxisInput, IButtonInput
-	{
+		IAxis Invert();
+		IAxis Debounce(float maxThreshold, TimeSpan? debounceTime = null);
+		IAxis AddButtonInput(IButton posButton, IButton negativeButton);
 	}
 
 	public class AxisInput : IAxisInput
@@ -64,7 +62,7 @@ namespace Entity
 		public Axis(IAxisInput axis, IAxisIcon axisIcon)
 		{
 			if (axis == null)
-				throw new ArgumentNullException("axisName");
+				throw new ArgumentNullException("axis");
 			if (axisIcon == null)
 				throw new ArgumentNullException("axisIcon");
 
@@ -107,10 +105,16 @@ namespace Entity
 			return new Axis(new InvertedAxisInput(this.axis), this.axisIcon);
 		}
 
-		public IAxis Debounce(float maxThreshold)
+		public IAxis Debounce(float maxThreshold, TimeSpan? debounceTime = null)
 		{
 			return new Axis(new DebouncedAxisInput(
-				this.axis, maxThreshold), this.axisIcon);
+				this.axis, maxThreshold, debounceTime), this.axisIcon);
+		}
+
+		public IAxis AddButtonInput(IButton posButton, IButton negativeButton)
+		{
+			return new Axis(new CompositeAxisInput(this.axis,
+				posButton.ToAxisInput(1), negativeButton.ToAxisInput(-1)), this.axisIcon);
 		}
 
 		public override string ToString()
@@ -119,7 +123,7 @@ namespace Entity
 		}
 	}
 
-	public class ButtonAxisInput : IButtonAxisInput
+	public class AxisButtonInput : IButtonInput
 	{
 		private readonly IAxisInput axis;
 		private bool wasPressed = false;
@@ -127,10 +131,10 @@ namespace Entity
 		private float lastValue = 0f;
 		private float threshold = 0f;
 
-		public ButtonAxisInput(IAxisInput axis, float threshold)
+		public AxisButtonInput(IAxisInput axis, float threshold)
 		{
 			if (axis == null)
-				throw new ArgumentNullException("axisName");
+				throw new ArgumentNullException("axis");
 
 			this.axis = axis;
 			this.threshold = threshold;
@@ -183,6 +187,36 @@ namespace Entity
 		}
 	}
 
+	public class ButtonAxisInput : IAxisInput
+	{
+		private readonly IButtonInput button;
+		private readonly float pressedAxisValue;
+
+		public ButtonAxisInput(IButtonInput button, float pressedAxisValue = 1f)
+		{
+			if (button == null)
+				throw new ArgumentNullException("button");
+
+			this.button = button;
+			this.pressedAxisValue = pressedAxisValue;
+		}
+
+		public string Name
+		{
+			get { return this.button.Name; }
+		}
+
+		public float Value
+		{
+			get { return this.button.IsPressed ? this.pressedAxisValue : 0; }
+		}
+
+		public override string ToString()
+		{
+			return this.button.ToString();
+		}
+	}
+
 	public class InvertedAxisInput : IAxisInput
 	{
 		private readonly IAxisInput axis;
@@ -190,7 +224,7 @@ namespace Entity
 		public InvertedAxisInput(IAxisInput axis)
 		{
 			if (axis == null)
-				throw new ArgumentNullException("axisName");
+				throw new ArgumentNullException("axis");
 
 			this.axis = axis;
 		}
@@ -215,15 +249,19 @@ namespace Entity
 	{
 		private readonly IAxisInput axis;
 		private float threshold;
+		private TimeSpan debounceTime;
 		private bool hasPassedThreshold;
+		private DateTime lastThresholdPassed = DateTime.Now;
 
-		public DebouncedAxisInput(IAxisInput axis, float threshold)
+		public DebouncedAxisInput(IAxisInput axis,
+			float threshold, TimeSpan? debounceTime = null)
 		{
 			if (axis == null)
 				throw new ArgumentNullException("axis");
 
 			this.axis = axis;
 			this.threshold = threshold;
+			this.debounceTime = debounceTime ?? TimeSpan.MaxValue;
 		}
 
 		public string Name
@@ -235,19 +273,75 @@ namespace Entity
 		{
 			get
 			{
-				var value = this.axis.Value;
-				var absValue = Mathf.Abs(value);
-				if (absValue > this.threshold && this.hasPassedThreshold)
+				var axisValue = this.axis.Value;
+				var absValue = Mathf.Abs(axisValue);
+				var timeSinceLastThreshold = DateTime.Now - this.lastThresholdPassed;
+
+				if (absValue > this.threshold && this.hasPassedThreshold &&
+				    timeSinceLastThreshold < this.debounceTime)
 					return 0;
 
 				this.hasPassedThreshold = absValue > this.threshold;
-				return value;
+				if (this.hasPassedThreshold)
+					this.lastThresholdPassed = DateTime.Now;
+				
+				return axisValue;
 			}
 		}
 
 		public override string ToString()
 		{
 			return this.axis.ToString();
+		}
+	}
+
+	public class CompositeAxisInput : IAxisInput
+	{
+		private readonly IAxisInput[] axises;
+
+		public CompositeAxisInput(params IAxisInput[] axises)
+		{
+			if (axises == null)
+				throw new ArgumentNullException("axises");
+
+			this.axises = axises.Where(axis => axis != null);
+		}
+
+		public string Name
+		{
+			get
+			{
+				var name = "CompositeAxis(";
+				if (this.axises.Length > 0)
+				{
+					name += this.axises[0].Name;
+					for (var i = 1; i < this.axises.Length; i++)
+						name += ", or " + this.axises[i].Name;
+				}
+
+				return name + ")";
+			}
+		}
+
+		public float Value
+		{
+			get
+			{
+				// Return the first axis with a non 0 value.
+				for (var i = 0; i < this.axises.Length; i++)
+				{
+					var axisValue = this.axises[i].Value;
+					if (Mathf.Abs(axisValue) > 0)
+						return axisValue;
+				}
+
+				return 0;
+			}
+		}
+
+		public override string ToString()
+		{
+			return this.Name;
 		}
 	}
 }
