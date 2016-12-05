@@ -1,68 +1,65 @@
 ﻿
 using UnityEngine;
-using System;
 
 namespace Entity
 {
 	public interface ISound
 	{
-		void PlayAt(Vector3 point);
+		void Play(GameObject source);
 	}
 
-	public abstract class Sound
+	public class Sound : SoundBase, ISound
 	{
-		protected readonly AudioSource audioSource;
-		private readonly AudioClip audioClip;
-		private readonly float volume;
-		private readonly float minDistance;
-		private readonly float maxDistance;
-		private readonly float seekTime;
+		private readonly float audibleRadius;
 
-		public Sound(AudioSource audioSource,
-			AudioClip audioClip, float volume = 1f, float minDistance = 2f,
+		public Sound(AudioSource audioSource, AudioClip audioClip,
+			float audibleRadius, float volume = 1f, float minDistance = 2f,
 			float maxDistance = 100f, float seekTime = 0)
+			: base(audioSource, audioClip, volume,
+				minDistance, maxDistance, seekTime)
 		{
-			if (audioSource == null)
-				throw new ArgumentNullException("audioSource");
-			if (audioClip == null)
-				throw new ArgumentNullException("audioClip");
-			if (volume < 0f || volume > 1f)
-				throw new ArgumentException("volumn should be between 0-1");
-			if (minDistance < 0f)
-				throw new ArgumentException("minDistance should be greater than 0");
-			if (maxDistance < 0f)
-				throw new ArgumentException("maxDistance should be greater than 0");
-
-			this.audioClip = audioClip;
-			this.audioSource = audioSource;
-			this.volume = volume;
-			this.minDistance = minDistance;
-			this.maxDistance = maxDistance;
-			this.seekTime = seekTime;
+			this.audibleRadius = audibleRadius > 0 ? audibleRadius : 0;
 		}
 
-		protected abstract void SetSpatialMode();
-
-		protected virtual void SetAudioSourceSettings()
+		protected override void SetSpatialMode()
 		{
-			this.audioSource.clip = this.audioClip;
-			this.audioSource.time = this.seekTime;
-			this.audioSource.volume = volume;
-			this.audioSource.minDistance = this.minDistance;
-			this.audioSource.maxDistance = this.maxDistance;
+			this.audioSource.spatialBlend = 1f;
+			this.audioSource.rolloffMode = AudioRolloffMode.Logarithmic;
 		}
 
-		public void Play()
+		public void Play(GameObject source)
 		{
-			SetSpatialMode();
-			SetAudioSourceSettings();
-			this.audioSource.Play();
-		}
-	}
+			if (source == null)
+				return;
 
-	public class NoSound : ISound, ISound2d
-	{
-		public void Play() { }
-		public void PlayAt(Vector3 point) { }
+			var point = source.transform.position;
+			this.audioSource.transform.position = point;
+			this.Play();
+
+			if (this.audibleRadius > 0)
+				TriggerSoundListeners(source);
+		}
+
+		private void TriggerSoundListeners(GameObject source)
+		{
+			var colliders = Physics.OverlapSphere(source.transform.position, this.audibleRadius);
+			foreach (Collider hit in colliders)
+			{
+				var gameObj = hit.gameObject;
+				if (gameObj == null)
+					continue;
+				
+				var listener = gameObj.GetComponent<ISoundListener>();
+				if (listener == null)
+					continue;
+
+				listener.OnHeard(this, source);
+			}
+		}
+
+		public override string ToString()
+		{
+			return "Sound(" + this.audioClip.name + ")";
+		}
 	}
 }

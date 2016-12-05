@@ -1,4 +1,5 @@
 ﻿
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,7 +7,8 @@ namespace Entity
 {
 	public interface IGameObjectSorter<T>
 	{
-		GameObject GetClosest(out float distance, out T additionalData);
+		GameObject GetClosest(out float distance, out T additionalData,
+			Func<T, bool> additionalFiltering = null);
 		void Add(GameObject gameObj, T additionalData);
 		void Remove(GameObject gameObj);
 	}
@@ -34,7 +36,8 @@ namespace Entity
 			this.entries.Add(new Entry<T>(gameObj, additionalData));
 		}
 
-		public GameObject GetClosest(out float distance, out T additionalData)
+		public GameObject GetClosest(out float distance, out T additionalData,
+			Func<T, bool> additionalFiltering = null)
 		{
 			distance = 0;
 			additionalData = default(T);
@@ -43,7 +46,12 @@ namespace Entity
 			var entry = this.entries
 				.Where(i =>
 				{
-					return i.PlayerAngle < 90 && i.CameraAngle < 25 && i.Distance < maxDistance;
+					var matchesAdditionalFilter = true;
+					if (additionalFiltering != null)
+						matchesAdditionalFilter = additionalFiltering(i.AdditionalData);
+				
+					return matchesAdditionalFilter && i.PlayerAngle < 90
+						&& i.CameraAngle < 25 && i.Distance < maxDistance;
 				})
 				.OrderBy(i => i.Distance + i.PlayerAngle + (i.CameraAngle * 2))
 				.FirstOrDefault();

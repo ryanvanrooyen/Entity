@@ -246,6 +246,23 @@ namespace Entity
 			return HasParent(gameObj, parent.transform);
 		}
 
+		public static bool HasParent(this GameObject gameObj, GameObject[] parents)
+		{
+			if (gameObj == null || parents == null)
+				return false;
+
+			for (var i = 0; i < parents.Length; i++)
+			{
+				var parent = parents[i];
+				if (gameObj == parent)
+					continue;
+				if (gameObj.HasParent(parent))
+					return true;
+			}
+
+			return false;
+		}
+
 		public static bool HasParent(this GameObject gameObj, Transform parent)
 		{
 			if (gameObj == null)
@@ -259,7 +276,7 @@ namespace Entity
 			if (transform == null || parent == null)
 				return false;
 
-			var currentParent = transform;
+			var currentParent = transform.parent;
 
 			while (currentParent != null)
 			{
@@ -267,6 +284,23 @@ namespace Entity
 					return true;
 
 				currentParent = currentParent.parent;
+			}
+
+			return false;
+		}
+
+		public static bool HasParent(this Transform transform, Transform[] parents)
+		{
+			if (transform == null || parents == null)
+				return false;
+
+			for (var i = 0; i < parents.Length; i++)
+			{
+				var parent = parents[i];
+				if (transform == parent)
+					continue;
+				if (transform.HasParent(parent))
+					return true;
 			}
 
 			return false;

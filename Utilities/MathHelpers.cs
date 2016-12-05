@@ -23,5 +23,13 @@ namespace Entity
 				total += item;
 			return total;
 		}
+
+		public static int Total(IEnumerable<int> items)
+		{
+			var total = 0;
+			foreach (var item in items)
+				total += item;
+			return total;
+		}
 	}
 }

@@ -108,11 +108,12 @@
     <Compile Include="Utilities\Objects.cs" />
     <Compile Include="Utilities\Platform.cs" />
     <Compile Include="Utilities\Pool.cs" />
-    <Compile Include="Sound\Sound.cs" />
+    <Compile Include="Sound\SoundBase.cs" />
     <Compile Include="Sound\Sound2D.cs" />
-    <Compile Include="Sound\Sound3D.cs" />
+    <Compile Include="Sound\Sound.cs" />
     <Compile Include="Sound\LoggedSound.cs" />
     <Compile Include="Utilities\NetHelpers.cs" />
+    <Compile Include="Sound\SoundListener.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Input\" />

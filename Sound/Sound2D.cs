@@ -8,7 +8,7 @@ namespace Entity
 		void Play();
 	}
 
-	public class Sound2D : Sound, ISound2d
+	public class Sound2D : SoundBase, ISound2d
 	{
 		public Sound2D(AudioSource audioSource,
 			AudioClip audioClip, float volume = 1f, float seekTime = 0)

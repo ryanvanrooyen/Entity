@@ -21,9 +21,9 @@ namespace Entity
 			this.text = text;
 		}
 
-		public void PlayAt(Vector3 point)
+		public void Play(GameObject source)
 		{
-			this.sound.PlayAt(point);
+			this.sound.Play(source);
 			this.logger.Info(this.text);
 		}
 	}
