@@ -13,6 +13,7 @@ namespace Entity
 		void Bind<T>(T t) where T : class;
 		void Bind<T>(GameObject gameObj);
 		void Bind<T1, T2>() where T2 : T1;
+		void Bind<T1, T2, T3>() where T3 : T2, T1;
 
 		void BindFactory<T>(IFactory<T> factory);
 		void BindFactory<T>(Func<IContainer, T> factory);

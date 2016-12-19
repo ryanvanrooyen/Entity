@@ -36,6 +36,7 @@ namespace Entity
 		{
 			this.icon.Source = iconSource;
 			this.text.Value = text;
+			this.IsVisible = true;
 			this.Alpha = 1f;
 		}
 

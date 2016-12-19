@@ -10,6 +10,7 @@ namespace Entity
 
 	public interface IWorldCanvas : IVisible, ILateUpdate
 	{
+		bool Enabled { get; set; }
 		GameObject Add(string prefab, Func<Vector3?> location,
 			float? offscreenIconDistance = null);
 	}
@@ -29,6 +30,25 @@ namespace Entity
 			this.worldCanvasParent = gameObjFactory.New("WorldCanvas", this.gameObj);
 			this.allAddedObjects = new List<WorldUIObject>();
 			this.removedObjects = new List<WorldUIObject>();
+			this.Enabled = true;
+		}
+
+		private bool enabled;
+		public bool Enabled
+		{
+			get { return this.enabled; }
+			set
+			{
+				this.enabled = value;
+				if (this.enabled)
+					return;
+				
+				foreach (var obj in this.allAddedObjects)
+				{
+					if (obj.UI != null)
+						obj.UI.SetActive(false);
+				}
+			}
 		}
 
 		public GameObject Add(string prefab, Func<Vector3?> location,
@@ -58,6 +78,9 @@ namespace Entity
 
 		public void LateUpdate()
 		{
+			if (!this.Enabled)
+				return;
+
 			UpdateObjectList();
 
 			// Go thru the objects list by farthest away objects first.

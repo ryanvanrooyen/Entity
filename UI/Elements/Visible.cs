@@ -1,7 +1,6 @@
 ﻿
 using UnityEngine;
 using System;
-using System.Collections.Generic;
 using System.Collections;
 
 namespace Entity
@@ -27,18 +26,21 @@ namespace Entity
 
 			this.gameObject = gameObject;
 			if (initVisible.HasValue)
-				this.IsVisible = initVisible.Value;
+			{
+				if (this.gameObject != null && initVisible.Value != this.gameObject.activeSelf)
+					this.gameObject.SetActive(initVisible.Value);
+			}
 		}
 
 		public virtual bool IsVisible
 		{
 			get
 			{
-				return this.gameObject.activeSelf;
+				return this.gameObject != null && this.gameObject.activeSelf;
 			}
 			set
 			{
-				if (value != this.gameObject.activeSelf)
+				if (this.gameObject != null && value != this.gameObject.activeSelf)
 					this.gameObject.SetActive(value);
 			}
 		}
@@ -113,6 +115,9 @@ namespace Entity
 
 		private void Fade()
 		{
+			if (this.gameObject == null)
+				return;
+			
 			if (this.isVisible)
 				this.gameObject.Run("FadeOut", FadeOut());
 			else

@@ -60,15 +60,16 @@ namespace Entity
 
 	public class AnimatedSlider : IAnimatedSlider
 	{
+		private const float sliderSpeed = 0.005f;
 		private readonly GameObject coroutineSrc;
 		private readonly ISlider slider;
-		private float value;
+		private float currentValue;
 
 		public AnimatedSlider(GameObject coroutineSrc, ISlider slider)
 		{
 			this.coroutineSrc = coroutineSrc;
 			this.slider = slider;
-			this.value = this.slider.Value;
+			this.currentValue = this.slider.Value;
 			this.UseAnimation = true;
 		}
 
@@ -76,14 +77,14 @@ namespace Entity
 
 		public float Value
 		{
-			get { return this.value; }
+			get { return this.currentValue; }
 			set
 			{
-				this.value = value;
+				this.currentValue = value;
 				if (this.IsVisible && this.UseAnimation)
 					this.coroutineSrc.Run("UpdateSliderValue", UpdateSliderValue());
 				else
-					this.slider.Value = this.value;
+					this.slider.Value = this.currentValue;
 			}
 		}
 
@@ -93,7 +94,7 @@ namespace Entity
 			set
 			{
 				this.slider.MinValue = value;
-				this.value = this.slider.Value;
+				this.currentValue = this.slider.Value;
 			}
 		}
 
@@ -103,7 +104,7 @@ namespace Entity
 			set
 			{
 				this.slider.MaxValue = value;
-				this.value = this.slider.Value;
+				this.currentValue = this.slider.Value;
 			}
 		}
 
@@ -115,21 +116,21 @@ namespace Entity
 
 		private IEnumerator UpdateSliderValue()
 		{
-			var increment = Mathf.Abs(this.slider.MaxValue) / 100;
+			var onePercent = 0.01f * this.MaxValue;
 
-			while (this.slider != null && this.value != this.slider.Value)
+			while (this.slider != null)
 			{
-				if (Mathf.Abs(this.value - this.slider.Value) < increment * 1.5f)
+				var updatedValue = Mathf.Lerp(this.slider.Value, this.currentValue,
+					Time.unscaledTime * sliderSpeed);
+
+				if (Mathf.Abs(updatedValue - this.currentValue) < onePercent)
 				{
-					this.slider.Value = this.value;
-					break;
+					this.slider.Value = this.currentValue;
+					yield break;
 				}
 
-				increment = Mathf.Abs(increment);
-				if (this.value < this.slider.Value && increment > 0)
-					increment = -increment;
-
-				this.slider.Value = this.slider.Value + increment;
+				this.slider.Value = updatedValue;
+				
 				yield return null;
 			}
 		}

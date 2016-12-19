@@ -1,25 +1,30 @@
 ﻿
-using System;
-
 namespace Entity
 {
 	public interface IGameState
 	{
 		bool IsPaused { get; }
-		bool HasDied { get; }
+		bool HasWon { get; }
+		bool HasLost { get; }
 	}
 
 	public interface IMutableGameState : IGameState
 	{
 		void SetPaused(bool isPaused);
-		void PlayerDied();
+		void PlayerWon();
+		void PlayerLost();
 	}
 
-	public static class StateExtensions
+	public static class GameStateExtensions
 	{
+		public static bool IsCompleted(this IGameState state)
+		{
+			return state == null || state.HasLost || state.HasWon;
+		}
+
 		public static bool IsStopped(this IGameState state)
 		{
-			return state == null || state.IsPaused || state.HasDied;
+			return state == null || state.IsPaused || state.HasLost || state.HasWon;
 		}
 
 		public static bool IsRunning(this IGameState state)
@@ -31,16 +36,24 @@ namespace Entity
 	public class GameState : IMutableGameState
 	{
 		public bool IsPaused { get; private set; }
-		public bool HasDied { get; private set; }
+		public bool HasWon { get; private set; }
+		public bool HasLost { get; private set; }
 
 		public void SetPaused(bool isPaused)
 		{
 			this.IsPaused = isPaused;
 		}
 
-		public void PlayerDied()
+		public void PlayerWon()
 		{
-			this.HasDied = true;
+			if (!this.HasLost)
+				this.HasWon = true;
+		}
+
+		public void PlayerLost()
+		{
+			if (!this.HasWon)
+				this.HasLost = true;
 		}
 	}
 }
