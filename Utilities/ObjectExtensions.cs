@@ -10,16 +10,21 @@ namespace Entity
 	{
 		private static GameObject coroutineSource;
 
-		static GameObjectExtensions()
+		private static GameObject CoroutineSrc()
 		{
+			if (coroutineSource != null)
+				return coroutineSource;
+
 			var name = "Coroutines";
 			coroutineSource = GameObject.Find(name);
 
 			if (coroutineSource == null)
 			{
 				coroutineSource = new GameObject(name);
-				coroutineSource.AddComponent<DontDestroyBetweenScenes>();
+				//coroutineSource.AddComponent<DontDestroyBetweenScenes>();
 			}
+
+			return coroutineSource;
 		}
 
 		public static void AddMetadata<T>(this GameObject gameObj, T data) where T : class
@@ -80,14 +85,18 @@ namespace Entity
 
 		private static void RunAlways(this GameObject gameObj, string coroutineId, IEnumerator coroutine)
 		{
-			RunOn(coroutineSource, gameObj, coroutineId, coroutine);
+			RunOn(CoroutineSrc(), gameObj, coroutineId, coroutine);
 		}
 
 		private static void RunOn(GameObject source, GameObject gameObj,
 			string coroutineId, IEnumerator coroutine)
 		{
 			if (source == null || gameObj == null || coroutine == null || coroutineId == null)
+			{
+				Debug.Log("Unable to run coroutine '" + coroutineId + "' on src: " + source);
+				
 				return;
+			}
 
 			var metadata = gameObj.GetOrAddComponent<Metadata>();
 			var srcMetadata = source.GetOrAddComponent<Metadata>();
@@ -322,6 +331,24 @@ namespace Entity
 			}
 
 			return false;
+		}
+
+		public static GameObject ParentWithTag(this GameObject gameObj, string tag)
+		{
+			if (gameObj == null || tag == null)
+				return null;
+
+			var currentParent = gameObj.transform;
+
+			while (currentParent != null)
+			{
+				if (currentParent.tag == tag)
+					return currentParent.gameObject;
+
+				currentParent = currentParent.parent;
+			}
+
+			return null;
 		}
 
 		public static void MoveLocal(this GameObject gameObj,
