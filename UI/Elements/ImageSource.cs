@@ -1,4 +1,5 @@
 ﻿
+using System;
 using UnityEngine;
 
 namespace Entity
@@ -14,6 +15,9 @@ namespace Entity
 
 		public ImgSource(Sprite icon)
 		{
+			if (icon == null)
+				throw new ArgumentNullException("icon");
+			
 			this.icon = icon;
 		}
 

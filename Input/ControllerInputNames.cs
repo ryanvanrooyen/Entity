@@ -13,6 +13,8 @@ namespace Entity
 		IInputName FaceButtonRight { get; }
 
 		bool DPadUsesAxisInput { get; }
+		bool DPadVerticalAxisInverted { get; }
+
 		IInputName DPadTop { get; }
 		IInputName DPadBottom { get; }
 		IInputName DPadLeft { get; }
@@ -96,6 +98,8 @@ namespace Entity
 		public IInputName FaceButtonRight { get; private set; }
 
 		public virtual bool DPadUsesAxisInput { get { return false; } }
+		public virtual bool DPadVerticalAxisInverted { get { return false; } }
+
 		public IInputName DPadTop { get; private set; }
 		public IInputName DPadBottom { get; private set; }
 		public IInputName DPadLeft { get; private set; }

@@ -1,4 +1,5 @@
 ﻿
+using System;
 using UnityEngine;
 
 namespace Entity
@@ -14,9 +15,9 @@ namespace Entity
 
 		public Sound(AudioSource audioSource, AudioClip audioClip,
 			float audibleRadius, float volume = 1f, float minDistance = 2f,
-			float maxDistance = 100f, float seekTime = 0)
+			float maxDistance = 100f, float seekTime = 0, float pitch = 1f)
 			: base(audioSource, audioClip, volume,
-				minDistance, maxDistance, seekTime)
+				minDistance, maxDistance, seekTime, pitch)
 		{
 			this.audibleRadius = audibleRadius > 0 ? audibleRadius : 0;
 		}
@@ -31,7 +32,7 @@ namespace Entity
 		{
 			if (source == null)
 				return;
-
+            
 			var point = source.transform.position;
 			this.audioSource.transform.position = point;
 			this.Play();
@@ -62,4 +63,31 @@ namespace Entity
 			return "Sound(" + this.audioClip.name + ")";
 		}
 	}
+
+    public class RotatingSound : ISound
+    {
+        private ISound[] sounds;
+        private long playCount;
+        
+        public RotatingSound(params ISound[] sounds)
+        {
+            if (sounds == null)
+                throw new ArgumentNullException("sounds");
+
+            this.sounds = sounds;
+        }
+        
+        public void Play(GameObject source)
+        {
+            if (this.sounds.Length == 0)
+                return;
+            
+            var currentIndex = this.playCount % this.sounds.Length;
+            var currentSound = this.sounds[currentIndex];
+
+            currentSound.Play(source);
+            
+            this.playCount++;
+        }
+    }
 }

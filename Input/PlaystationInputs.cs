@@ -41,5 +41,6 @@ namespace Entity
 		}
 
 		public override bool DPadUsesAxisInput { get { return true; } }
+		public override bool DPadVerticalAxisInverted { get { return true; } }
 	}
 }

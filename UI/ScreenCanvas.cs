@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Entity
 {
@@ -12,7 +13,7 @@ namespace Entity
 	{
 		bool Enabled { get; set; }
 		GameObject Add(string prefab, Func<Vector3?> location,
-			float? offscreenIconDistance = null);
+			float? offscreenIconDistance = null, Vector2? offscreenIconOffset = null);
 	}
 
 	public class ScreenCanvas : Canvas, IScreenCanvas, IWorldCanvas
@@ -52,7 +53,7 @@ namespace Entity
 		}
 
 		public GameObject Add(string prefab, Func<Vector3?> location,
-			float? offscreenIconDistance = null)
+			float? offscreenIconDistance = null, Vector2? offscreenIconOffset = null)
 		{
 			if (location == null)
 				return null;
@@ -71,7 +72,7 @@ namespace Entity
 			}
 
 			this.allAddedObjects.Add(new WorldUIObject(obj, location,
-				offscreenIconDistance, arrowIcon));
+				offscreenIconOffset, offscreenIconDistance, arrowIcon));
 
 			return obj;
 		}
@@ -94,8 +95,17 @@ namespace Entity
 
 				if (obj.Location.HasValue)
 				{
-					screenPoint = GetCanvasPosition(obj.Location.Value,
-						obj.OffscreenIconDistance, out drawOffscreenIcon);
+					var drawWhenOffscreen = obj.OffscreenIconDistance.HasValue;
+					if (drawWhenOffscreen)
+					{
+						var screenPadding = new Vector2(90, 70);
+						screenPoint = GetClampedCanvasPositionEllipse(
+							obj.Location.Value, screenPadding, out drawOffscreenIcon);
+					}
+					else
+					{
+						screenPoint = GetCanvasPosition(obj.Location.Value);
+					}
 				}
 
 				if (screenPoint.HasValue)
@@ -116,9 +126,10 @@ namespace Entity
 						else
 							obj.OffscreenIcon.SetActive(false);
 					}
-
-					if (!obj.UI.activeSelf)
+					else
+					{
 						obj.UI.SetActive(true);
+					}
 				}
 				else
 				{
@@ -134,10 +145,21 @@ namespace Entity
 
 		private void DrawOffscreenIcon(WorldUIObject obj, Vector2 screenPos)
 		{
+			if (!obj.UI.activeSelf)
+			{
+				obj.OffscreenIcon.SetActive(false);
+				return;
+			}
+
+			var iconOffset = obj.OffscreenIconOffset ?? Vector2.zero;
+			//var iconOffset = Vector2.zero;
+			// Adjust the screen pos with the icon's offset.
+			screenPos = screenPos + iconOffset;
+
 			var transform = obj.OffscreenIconTransform;
 			var distance = obj.OffscreenIconDistance ?? 30;
-			var iconOffset = screenPos.normalized * distance;
-			transform.anchoredPosition = screenPos + iconOffset;
+			var iconDist = screenPos.normalized * distance;
+			transform.anchoredPosition = screenPos + iconOffset + iconDist;
 
 			var rads = Math.Atan2(-screenPos.y, screenPos.x);
 			var degrees = rads * (180 / Math.PI);
@@ -184,6 +206,7 @@ namespace Entity
 
 			public GameObject UI { get; private set; }
 			public Vector3? Location { get; private set; }
+			public Vector2? OffscreenIconOffset { get; private set; }
 			public float? OffscreenIconDistance { get; private set; }
 			public GameObject OffscreenIcon { get; private set; }
 			public RectTransform OffscreenIconTransform { get; private set; }
@@ -191,10 +214,11 @@ namespace Entity
 			public Vector3 InitialScale { get; private set; }
 
 			public WorldUIObject(GameObject ui, Func<Vector3?> locationSrc,
-				float? offscreenIconDistance, GameObject arrowIcon)
+				Vector2? offscreenIconOffset, float? offscreenIconDistance, GameObject arrowIcon)
 			{
 				this.UI = ui;
 				this.locationSrc = locationSrc;
+				this.OffscreenIconOffset = offscreenIconOffset;
 				this.OffscreenIconDistance = offscreenIconDistance;
 				this.OffscreenIcon = arrowIcon;
 				this.Transform = ui.GetComponent<RectTransform>();

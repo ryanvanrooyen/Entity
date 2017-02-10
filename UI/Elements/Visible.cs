@@ -142,6 +142,75 @@ namespace Entity
 			}
 		}
 	}
+	
+	public class ScaleVisible : IVisible
+	{
+		private readonly GameObject gameObject;
+		private readonly float visibleScale;
+		private readonly float invisibleScale;
+		private readonly float duration;
+		private bool isVisible;
+
+		public ScaleVisible(GameObject gameObject,
+			float visibleScale, float invisibleScale, float duration, bool isVisible = true)
+		{
+			if (gameObject == null)
+				throw new ArgumentNullException("gameObject");
+
+			this.gameObject = gameObject;
+			this.visibleScale = visibleScale;
+			this.invisibleScale = invisibleScale;
+			this.duration = duration;
+			this.isVisible = isVisible;
+
+			this.gameObject.SetActive(isVisible);
+			if (isVisible)
+				this.gameObject.Scale(visibleScale);
+		}
+
+		public bool IsVisible
+		{
+			get
+			{
+				return this.isVisible;
+			}
+			set
+			{
+				if (value == this.isVisible)
+					return;
+
+				this.isVisible = value;
+				if (this.gameObject == null)
+					return;
+
+
+				var popInDuration = 0.08f;
+				var popInAmount = 0.08f;
+				
+				if (value)
+				{
+					this.gameObject.Scale(this.invisibleScale);
+					this.gameObject.SetActive(true);
+
+					this.gameObject.Scale(this.visibleScale + popInAmount, this.duration - popInDuration,
+						animateIndependentOfTime: true, callback: () => {
+
+						this.gameObject.Scale(this.visibleScale, popInDuration, animateIndependentOfTime: true);
+					});
+
+					return;
+				}
+
+				this.gameObject.Scale(this.visibleScale + popInAmount, popInDuration,
+						animateIndependentOfTime: true, callback: () => {
+
+						this.gameObject.Scale(this.invisibleScale, this.duration - popInDuration,
+							animateIndependentOfTime: true, callback: () => this.gameObject.SetActive(false));
+				});
+				
+			}
+		}
+	}
 
 	public class VisibleComposite : IVisible
 	{

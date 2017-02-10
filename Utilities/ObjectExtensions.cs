@@ -70,7 +70,7 @@ namespace Entity
 					return null;
 			}
 
-			return metadata.Get<T>();
+			return metadata.GetMeta<T>();
 		}
 
 		public static IUnityBehavior AddBehavior(this GameObject gameObj)
@@ -415,8 +415,8 @@ namespace Entity
 			}
 		}
 
-		public static void Scale(this GameObject gameObj, float scale,
-			float durationSecs = 0f, bool animateIndependentOfTime = false)
+		public static void Scale(this GameObject gameObj, float scale, float durationSecs = 0f,
+			bool animateIndependentOfTime = false, Action callback = null)
 		{
 			var destScale = new Vector3(scale, scale, scale);
 			if (Equal(gameObj.transform.localScale, destScale))
@@ -429,7 +429,7 @@ namespace Entity
 			}
 
 			gameObj.RunAlways("_LerpScale", LerpScale(
-				gameObj, destScale, durationSecs, animateIndependentOfTime));
+				gameObj, destScale, durationSecs, animateIndependentOfTime, callback));
 		}
 
 		public static void SetLayerRecursively(this GameObject obj, int newLayer)
@@ -446,8 +446,8 @@ namespace Entity
 			}
 		}
 
-		private static IEnumerator LerpScale(GameObject gameObj,
-			Vector3 destScale, float durationSecs, bool animateIndependentOfTime)
+		private static IEnumerator LerpScale(GameObject gameObj, Vector3 destScale,
+			float durationSecs, bool animateIndependentOfTime, Action callback = null)
 		{
 			var transform = gameObj.transform;
 			var elapsedTime = animateIndependentOfTime ? Time.unscaledDeltaTime : Time.deltaTime;
@@ -468,6 +468,9 @@ namespace Entity
 
 				yield return null;
 			}
+
+			if (callback != null)
+				callback();
 		}
 
 		public static Vector3 GetAimPoint(this Transform transform, Vector3 targetPos,
@@ -510,7 +513,9 @@ namespace Entity
 
 		private static bool Equal(Vector3 v1, Vector3 v2)
 		{
+#pragma warning disable RECS0018 // Comparison of floating point numbers with equality operator
 			return v1.x == v2.x && v1.y == v2.y && v1.z == v2.z;
+#pragma warning restore RECS0018 // Comparison of floating point numbers with equality operator
 		}
 
 		private class Metadata : MonoBehaviour
@@ -523,7 +528,7 @@ namespace Entity
 				this.data.Add(data);
 			}
 
-			public T Get<T>() where T : class
+			public T GetMeta<T>() where T : class
 			{
 				for (var i = 0; i < this.data.Count; i++)
 				{
@@ -537,7 +542,7 @@ namespace Entity
 
 			public T GetOrAdd<T>(Func<T> factory) where T : class
 			{
-				var item = Get<T>();
+				var item = GetMeta<T>();
 				if (item != null)
 					return item;
 
@@ -548,7 +553,7 @@ namespace Entity
 
 			public T Remove<T>() where T : class
 			{
-				var item = Get<T>();
+				var item = GetMeta<T>();
 				if (item != null)
 					this.data.Remove(item);
 

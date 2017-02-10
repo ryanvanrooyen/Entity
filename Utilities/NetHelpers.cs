@@ -57,6 +57,23 @@ namespace Entity
 
 			return true;
 		}
+		
+		public static X[] Select<T, X>(this T[] items, Func<T, X> selector)
+		{
+			// This is how LINQ's .All handles the empty case.
+			if (items == null || items.Length == 0)
+				return new X[0];
+
+			var newArray = new X[items.Length];
+
+			if (selector == null)
+				return newArray;
+			
+			for (var i = 0; i < items.Length; i++)
+				newArray[i] = selector(items[i]);
+
+			return newArray;
+		}
 
 		public static bool All<T>(this ICollection<T> items, Func<T, bool> condition)
 		{

@@ -12,14 +12,16 @@ namespace Entity
 	{
 		private readonly IImage icon;
 		private readonly Action onPressed;
+		private readonly Action<bool> isPressed;
 
 		public UIButton(IButton button, GameObject obj,
-			Action onPressed = null) : base(button)
+			Action onPressed = null, Action<bool> isPressed = null) : base(button)
 		{
 			if (obj == null)
 				throw new ArgumentNullException("obj");
 
 			this.onPressed = onPressed;
+			this.isPressed = isPressed;
 			this.icon = new Img(obj);
 			var behavior = obj.AddBehavior();
 			behavior.OnUpdate = () => RefreshImage();
@@ -40,6 +42,8 @@ namespace Entity
 		{
 			this.icon.Source = this.button;
 
+			if (this.isPressed != null)
+				this.isPressed(this.button.IsPressed);
 			if (this.onPressed != null && this.button.WasPressed)
 				this.onPressed();
 		}

@@ -13,6 +13,8 @@ namespace Entity
 		public IInputName FaceButtonRight { get { return new InputName("Button1", "B"); } }
 
 		public bool DPadUsesAxisInput { get { return false; } }
+		public bool DPadVerticalAxisInverted { get { return false; } }
+
 		public IInputName DPadTop { get { return new InputName("Axis8", "DPad-Up"); } }
 		public IInputName DPadBottom { get { return new InputName("Axis8", "DPad-Down"); } }
 		public IInputName DPadLeft { get { return new InputName("Axis7", "DPad-Left"); } }

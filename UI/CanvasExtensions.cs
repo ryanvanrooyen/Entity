@@ -6,7 +6,7 @@ namespace Entity
 	public static class CanvasExtensions
 	{
 		public static GameObject Add(this IWorldCanvas canvas, string prefab,
-			GameObject trackedObj, Vector3 offset, float? offscreenIconDistance = null)
+			GameObject trackedObj, Vector3 offset, float? offscreenIconDistance = null, Vector2? offscreenIconOffset = null)
 		{
 			GameObject obj = null;
 			obj = canvas.Add(prefab, () =>
@@ -19,7 +19,7 @@ namespace Entity
 
 				return trackedObj.transform.position + offset;
 
-			}, offscreenIconDistance);
+			}, offscreenIconDistance, offscreenIconOffset);
 
 			return obj;
 		}

@@ -12,6 +12,8 @@ namespace Entity
 	public interface IAxisInput : IAxisValue
 	{
 		string Name { get; }
+		bool Enabled { get; set; }
+		IAxisInput New();
 	}
 
 	public interface IAxis : IAxisValue, IImgSource
@@ -19,6 +21,7 @@ namespace Entity
 		IImgSource NextIcon { get; }
 		IImgSource PreviousIcon { get; }
 
+		bool Enabled { get; set; }
 		IAxis Invert();
 		IAxis Debounce(float maxThreshold, TimeSpan? debounceTime = null);
 		IAxis AddButtonInput(IButton posButton, IButton negativeButton);
@@ -36,7 +39,22 @@ namespace Entity
 
 			this.axisName = axisName.Name;
 			this.label = axisName.Label;
+			this.Enabled = true;
 		}
+		
+		private AxisInput(string name, string label)
+		{
+			if (name == null)
+				throw new ArgumentNullException("name");
+			if (label == null)
+				throw new ArgumentNullException("label");
+				
+			this.axisName = name;
+			this.label = label;
+			this.Enabled = true;
+		}
+		
+		public bool Enabled { get; set; }
 
 		public string Name
 		{
@@ -45,7 +63,12 @@ namespace Entity
 
 		public float Value
 		{
-			get { return Input.GetAxis(this.axisName); }
+			get { return this.Enabled ? Input.GetAxis(this.axisName) : 0; }
+		}
+		
+		public IAxisInput New()
+		{
+			return new AxisInput(this.Name, this.label);
 		}
 
 		public override string ToString()
@@ -68,6 +91,12 @@ namespace Entity
 
 			this.axis = axis;
 			this.axisIcon = axisIcon;
+		}
+		
+		public bool Enabled
+		{
+			get { return this.axis.Enabled; }
+			set { this.axis.Enabled = value; }
 		}
 
 		public IImgSource NextIcon
@@ -199,7 +228,10 @@ namespace Entity
 
 			this.button = button;
 			this.pressedAxisValue = pressedAxisValue;
+			this.Enabled = true;
 		}
+		
+		public bool Enabled { get; set; }
 
 		public string Name
 		{
@@ -208,7 +240,12 @@ namespace Entity
 
 		public float Value
 		{
-			get { return this.button.IsPressed ? this.pressedAxisValue : 0; }
+			get { return this.Enabled && this.button.IsPressed ? this.pressedAxisValue : 0; }
+		}
+			
+		public IAxisInput New()
+		{
+			return new ButtonAxisInput(this.button, this.pressedAxisValue);
 		}
 
 		public override string ToString()
@@ -229,6 +266,12 @@ namespace Entity
 			this.axis = axis;
 		}
 
+		public bool Enabled
+		{
+			get { return this.axis.Enabled; }
+			set { this.axis.Enabled = value; }
+		}
+		
 		public string Name
 		{
 			get { return this.axis.Name; }
@@ -239,6 +282,11 @@ namespace Entity
 			get { return this.axis.Value * -1; }
 		}
 
+		public IAxisInput New()
+		{
+			return this.axis.New();
+		}
+		
 		public override string ToString()
 		{
 			return this.axis.ToString();
@@ -262,6 +310,12 @@ namespace Entity
 			this.axis = axis;
 			this.threshold = threshold;
 			this.debounceTime = debounceTime ?? TimeSpan.MaxValue;
+		}
+		
+		public bool Enabled
+		{
+			get { return this.axis.Enabled; }
+			set { this.axis.Enabled = value; }
 		}
 
 		public string Name
@@ -289,6 +343,11 @@ namespace Entity
 			}
 		}
 
+		public IAxisInput New()
+		{
+			return new DebouncedAxisInput(this.axis.New(), this.threshold, this.debounceTime);
+		}
+		
 		public override string ToString()
 		{
 			return this.axis.ToString();
@@ -307,6 +366,16 @@ namespace Entity
 			this.axises = axises.Where(axis => axis != null);
 		}
 
+		public bool Enabled
+		{
+			get { return this.axises.All(a => a.Enabled); }
+			set
+			{
+				for (var i = 0; i < this.axises.Length; i++)
+					this.axises[i].Enabled = value;
+			}
+		}
+		
 		public string Name
 		{
 			get
@@ -337,6 +406,11 @@ namespace Entity
 
 				return 0;
 			}
+		}
+		
+		public IAxisInput New()
+		{
+			return new CompositeAxisInput(this.axises.Select(a => a.New()));
 		}
 
 		public override string ToString()

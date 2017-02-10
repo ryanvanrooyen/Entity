@@ -89,17 +89,17 @@ namespace Entity
 	{
 		private readonly IButtonInput input;
 		private readonly IButtonIcon icon;
-
+		private bool enabled = true;
+		
 		public Button(IButtonInput input, IButtonIcon icon)
 		{
 			if (input == null)
 				throw new ArgumentNullException("input");
 			if (icon == null)
-				throw new ArgumentNullException("icons");
+				throw new ArgumentNullException("icon");
 
 			this.input = input;
 			this.icon = icon;
-			this.Enabled = true;
 		}
 
 		public bool IsPressed
@@ -112,7 +112,11 @@ namespace Entity
 			get { return this.Enabled && this.input.WasPressed; }
 		}
 
-		public bool Enabled { get; set; }
+		public virtual bool Enabled
+		{
+			get { return this.enabled; }
+			set { this.enabled = value; }
+		}
 
 		public Sprite Image
 		{

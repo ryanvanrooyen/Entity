@@ -55,7 +55,7 @@ namespace Entity
 			INavEvents events, INavItemSource itemSource,
 			bool childNavsCaptureInput = true, bool autoResolveFocus = false)
 			: base(selectButton, cancelButton,
-				axis.Vertical.AddButtonInput(dpad.Bottom, dpad.Top),
+				axis.Vertical.AddButtonInput(dpad.Top, dpad.Bottom),
 				onMoveSound, events, itemSource, childNavsCaptureInput, autoResolveFocus)
 		{ }
 	}
@@ -84,7 +84,7 @@ namespace Entity
 				.Debounce(AxisNavigation.DebounceThreshold, AxisNavigation.DebounceTime);
 			
 			this.columnAxis = axis.Vertical
-				.AddButtonInput(dpad.Bottom, dpad.Top)
+				.AddButtonInput(dpad.Top, dpad.Bottom)
 				.Debounce(AxisNavigation.DebounceThreshold, AxisNavigation.DebounceTime);
 
 			this.itemsPerRow = itemsPerRow;

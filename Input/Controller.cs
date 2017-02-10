@@ -37,8 +37,10 @@ namespace Entity
 			if (names.DPadUsesAxisInput)
 			{
 				this.DPad = new FaceButtons(
-					CreateAxisButton(names.DPadTop, icons.DPadTop, 0.5f),
-					CreateAxisButton(names.DPadBottom, icons.DPadBottom, -0.5f),
+					CreateAxisButton(names.DPadTop, icons.DPadTop,
+						 names.DPadVerticalAxisInverted ? -0.5f : 0.5f),
+					CreateAxisButton(names.DPadBottom, icons.DPadBottom,
+						 names.DPadVerticalAxisInverted ? 0.5f : -0.5f),
 					CreateAxisButton(names.DPadLeft, icons.DPadLeft, -0.5f),
 					CreateAxisButton(names.DPadRight, icons.DPadRight, 0.5f));
 			}
