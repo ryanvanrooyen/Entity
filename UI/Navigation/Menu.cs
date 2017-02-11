@@ -53,6 +53,11 @@ namespace Entity
 			this.source = source;
 			this.visible = new Visible(this.source.GameObj, initVisible);
 		}
+        
+        public void Refresh()
+        {
+            this.nav.Refresh();
+        }
 
 		public virtual void CheckNavigation()
 		{

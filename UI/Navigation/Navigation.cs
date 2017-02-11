@@ -7,6 +7,7 @@ namespace Entity
 	{
 		void CheckNavigation();
 		INavItem SelectedItem { get; }
+        void Refresh();
 	}
 
 	public interface INavigation<T> : INavigatable
@@ -32,10 +33,18 @@ namespace Entity
 		public void OnChildNavGaveUpFocus() { }
 		public void OnGaveUpFocus() { }
 	}
+    
+    public class NullNav : INavigatable
+    {
+        public void CheckNavigation() { }
+        public INavItem SelectedItem { get { return null; } }
+        public void Refresh() { }
+        public bool HasFocus { get; set; } 
+    }
 
-	public class Navigation<T> : INavigation<T>
+    public class Navigation<T> : INavigation<T>
 	{
-		private readonly INavItemSource itemSource;
+		protected readonly INavItem[] items;
 		private readonly IButton selectButton;
 		private readonly IButton cancelButton;
 		private readonly ISound2d onMoveSound;
@@ -43,10 +52,11 @@ namespace Entity
 		private readonly bool childNavsCaptureInput;
 		private readonly bool autoResolveFocus;
 		private readonly bool autoSelectItem;
+        private int selectedIndex;
 		private bool hasFocus = false;
 
 		public Navigation(IButton selectButton, IButton cancelButton,
-			INavItemSource itemSource, ISound2d onMoveSound, INavEvents events,
+			INavItem[] items, ISound2d onMoveSound, INavEvents events,
 			bool childNavsCaptureInput = true,
 			bool autoResolveFocus = false,
 			bool autoSelectItem = false)
@@ -55,22 +65,27 @@ namespace Entity
 				throw new ArgumentNullException("selectButton");
 			if (cancelButton == null)
 				throw new ArgumentNullException("cancelButton");
-			if (itemSource == null)
-				throw new ArgumentNullException("itemSource");
-			if (onMoveSound == null)
-				throw new ArgumentNullException("onMoveSound");
-			if (events == null)
-				throw new ArgumentNullException("events");
-
+			if (items == null)
+				throw new ArgumentNullException("items");
+            if (items.Length == 0)
+                throw new ArgumentException("navigation items cannot be empty");
+            if (onMoveSound == null)
+                throw new ArgumentNullException("onMoveSound");
+            if (events == null)
+                throw new ArgumentNullException("events");
+                
 			this.selectButton = selectButton;
 			this.cancelButton = cancelButton;
-			this.itemSource = itemSource;
+			this.items = items;
 			this.onMoveSound = onMoveSound;
 			this.events = events;
 			this.childNavsCaptureInput = childNavsCaptureInput;
 			this.autoResolveFocus = autoResolveFocus;
 			this.autoSelectItem = autoSelectItem;
+            this.Refresh();
 		}
+        
+        protected int CurrentIndex { get { return this.selectedIndex; } }
 
 		public virtual void CheckNavigation()
 		{
@@ -134,7 +149,7 @@ namespace Entity
 
 		public INavItem SelectedItem
 		{
-			get { return this.itemSource.SelectedItem; }
+			get { return this.items[this.selectedIndex]; }
 		}
 
 		public IButton SelectButton { get { return this.selectButton; } }
@@ -144,29 +159,43 @@ namespace Entity
 
 		public bool HasNext
 		{
-			get { return this.itemSource.HasNext; }
+			get { return this.selectedIndex < (this.items.Length - 1); }
 		}
 
 		public bool HasPrevious
 		{
-			get { return this.itemSource.HasPrevious; }
+            get { return this.selectedIndex > 0; }
 		}
 
 		protected virtual void CheckInput()
 		{
 		}
 
-		protected void MoveNext()
+		protected void MoveNext(int skip = 0)
 		{
+            if (skip < 0)
+                skip = 0;
+                
 			var previousItem = this.SelectedItem;
-			this.itemSource.MoveNext();
+            var newIndex = this.selectedIndex + skip + 1;
+            if (newIndex >= this.items.Length)
+                newIndex = this.items.Length - 1;
+
+            this.selectedIndex = newIndex;
 			OnMove(previousItem);
 		}
 
-		protected void MovePrevious()
+		protected void MovePrevious(int skip = 0)
 		{
-			var previousItem = this.SelectedItem;
-			this.itemSource.MovePrevious();
+            if (skip < 0)
+                skip = 0;
+                
+            var previousItem = this.SelectedItem;
+            var newIndex = this.selectedIndex - skip - 1;
+            if (newIndex < 0)
+                newIndex = 0;
+
+            this.selectedIndex = newIndex;
 			OnMove(previousItem);
 		}
 
@@ -189,8 +218,6 @@ namespace Entity
 				if (value == this.hasFocus)
 					return;
 
-				this.itemSource.RefreshSelectedItem();
-
 				var selectedItem = this.SelectedItem;
 				if (selectedItem != null)
 					selectedItem.HasFocus = value;
@@ -198,10 +225,15 @@ namespace Entity
 				this.hasFocus = value;
 			}
 		}
+        
+        public void Refresh()
+        {
+            for (var i = 0; i < this.items.Length; i++)
+                this.items[i].HasFocus = i == this.selectedIndex;
+        }
 
 		private void CheckChildNav()
 		{
-
 		}
 	}
 
@@ -264,6 +296,11 @@ namespace Entity
 		{
 			get { return this.navigation.HasNext; }
 		}
+
+        public void Refresh()
+        {
+            this.navigation.Refresh();
+        }
 
 		public bool HasPrevious
 		{

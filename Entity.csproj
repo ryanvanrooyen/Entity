@@ -79,7 +79,6 @@
     <Compile Include="UI\MenuCanvas.cs" />
     <Compile Include="UI\ScreenCanvas.cs" />
     <Compile Include="UI\Navigation\ButtonNavigation.cs" />
-    <Compile Include="UI\Navigation\ItemSource.cs" />
     <Compile Include="UI\Navigation\Menu.cs" />
     <Compile Include="UI\Navigation\NavItem.cs" />
     <Compile Include="UI\Navigation\Navigation.cs" />

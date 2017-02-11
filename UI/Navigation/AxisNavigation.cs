@@ -12,9 +12,9 @@ namespace Entity
 
 		public AxisNavigation(IButton selectButton,
 			IButton cancelButton, IAxis axis, ISound2d onMoveSound,
-			INavEvents events, INavItemSource itemSource,
+			INavEvents events, INavItem[] items,
 			bool childNavsCaptureInput = true, bool autoResolveFocus = false)
-			: base(selectButton, cancelButton, itemSource, onMoveSound, events,
+			: base(selectButton, cancelButton, items, onMoveSound, events,
 				childNavsCaptureInput, autoResolveFocus)
 		{
 			if (axis == null)
@@ -40,11 +40,11 @@ namespace Entity
 	{
 		public HorizontalNavigation(IButton selectButton, IButton cancelButton,
 			IDualAxis axis, IFaceButtons dpad, ISound2d onMoveSound,
-			INavEvents events, INavItemSource itemSource,
+			INavEvents events, INavItem[] items,
 			bool childNavsCaptureInput = true, bool autoResolveFocus = false)
 			: base(selectButton, cancelButton,
 				axis.Horizontal.Invert().AddButtonInput(dpad.Left, dpad.Right),
-				onMoveSound, events, itemSource, childNavsCaptureInput, autoResolveFocus)
+				onMoveSound, events, items, childNavsCaptureInput, autoResolveFocus)
 		{ }
 	}
 
@@ -52,26 +52,26 @@ namespace Entity
 	{
 		public VerticalNavigation(IButton selectButton, IButton cancelButton,
 			IDualAxis axis, IFaceButtons dpad, ISound2d onMoveSound,
-			INavEvents events, INavItemSource itemSource,
+			INavEvents events, INavItem[] items,
 			bool childNavsCaptureInput = true, bool autoResolveFocus = false)
 			: base(selectButton, cancelButton,
 				axis.Vertical.AddButtonInput(dpad.Top, dpad.Bottom),
-				onMoveSound, events, itemSource, childNavsCaptureInput, autoResolveFocus)
+				onMoveSound, events, items, childNavsCaptureInput, autoResolveFocus)
 		{ }
 	}
 
 	public class GridNavigation : Navigation<IAxis>
 	{
 		private const float threshold = 0.7f;
-		private readonly IAxis rowAxis;
-		private readonly IAxis columnAxis;
-		private readonly int itemsPerRow;
+		private readonly IAxis horizontalAxis;
+		private readonly IAxis verticalAxis;
+        private readonly int itemsPerRow;
 
 		public GridNavigation(IButton selectButton, IButton cancelButton,
 			IDualAxis axis, IFaceButtons dpad, int itemsPerRow, ISound2d onMoveSound,
-			INavEvents events, INavItemSource itemSource,
+			INavEvents events, INavItem[] items,
 			bool childNavsCaptureInput = true, bool autoResolveFocus = false)
-			: base(selectButton, cancelButton, itemSource, onMoveSound, events,
+			: base(selectButton, cancelButton, items, onMoveSound, events,
 				childNavsCaptureInput, autoResolveFocus)
 		{
 			if (axis == null)
@@ -79,44 +79,48 @@ namespace Entity
 			if (dpad == null)
 				throw new ArgumentNullException("dpad");
 			
-			this.rowAxis = axis.Horizontal.Invert()
+			this.horizontalAxis = axis.Horizontal.Invert()
 				.AddButtonInput(dpad.Left, dpad.Right)
 				.Debounce(AxisNavigation.DebounceThreshold, AxisNavigation.DebounceTime);
 			
-			this.columnAxis = axis.Vertical
+			this.verticalAxis = axis.Vertical
 				.AddButtonInput(dpad.Top, dpad.Bottom)
 				.Debounce(AxisNavigation.DebounceThreshold, AxisNavigation.DebounceTime);
 
 			this.itemsPerRow = itemsPerRow;
-			this.PreviousInput = this.rowAxis;
-			this.NextInput = this.rowAxis;
+			this.PreviousInput = this.horizontalAxis;
+			this.NextInput = this.horizontalAxis;
 		}
 
 		protected override void CheckInput()
 		{
-			var value = this.rowAxis.Value;
-			if (value < (-threshold))
+			var value = this.horizontalAxis.Value;
+            var isBeginningOfRow = this.CurrentIndex % this.itemsPerRow == 0;
+            var isEndOfRow = (this.CurrentIndex + 1) % this.itemsPerRow == 0;
+            
+			if (!isEndOfRow && value < (-threshold))
 				MoveNext();
-			else if (value > threshold)
+			else if (!isBeginningOfRow && value > threshold)
 				MovePrevious();
 
-			value = this.columnAxis.Value;
-			if (value < (-threshold))
-				NextColumn();
-			else if (value > threshold)
-				PreviousColumn();
+			value = this.verticalAxis.Value;
+
+            var isFirstRow = this.CurrentIndex < this.itemsPerRow;
+            var isLastRow = this.CurrentIndex >= this.items.Length - this.itemsPerRow;
+			if (!isLastRow && value < (-threshold))
+				NextRow();
+			else if (!isFirstRow && value > threshold)
+				PreviousRow();
 		}
 
-		private void NextColumn()
+		private void NextRow()
 		{
-			for (var i = 0; i < this.itemsPerRow; i++)
-				MoveNext();
+            MoveNext(this.itemsPerRow - 1);
 		}
 
-		private void PreviousColumn()
+		private void PreviousRow()
 		{
-			for (var i = 0; i < this.itemsPerRow; i++)
-				MovePrevious();
+			MovePrevious(this.itemsPerRow - 1);
 		}
 	}
 
